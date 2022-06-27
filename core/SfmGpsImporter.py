@@ -1,5 +1,5 @@
+from ..dependencies import deps
 import numpy as np
-from pyproj import Transformer
 
 ECEF = 'epsg:4978'
 LLH = 'epsg:4979'
@@ -23,7 +23,7 @@ class SfmGpsImporter:
                     v['center'] = [float(l[0]), float(l[1]), float(l[2])]
         xyz_MR = []
         xyz_ECEF = []
-        transformer = Transformer.from_crs(LLH, ECEF)
+        transformer = deps['pyproj'].Transformer.from_crs(LLH, ECEF)
         for g in gps[1:]:
             l = g.strip().split(',')
             for v in df:

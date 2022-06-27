@@ -10,7 +10,7 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator
 
 from .operators.EnuTransform import *
-
+from .dependencies import deps
 
 bl_info = {
     "name": "meshEarth",
@@ -32,7 +32,8 @@ Dependency = namedtuple("Dependency", ["module", "package", "name"])
 # of the arguments. DO NOT use this to import other parts of your Python add-on, import them as usual with an
 # "import" statement.
 dependencies = (Dependency(module="pyproj", package=None, name=None),
-                Dependency(module="sklearn", package=None, name=None))
+                Dependency(module="sklearn.linear_model", package=None, name=None))
+
 
 dependencies_installed = False
 
@@ -49,12 +50,12 @@ def import_module(module_name, global_name=None, reload=True):
     if global_name is None:
         global_name = module_name
 
-    if global_name in globals():
-        importlib.reload(globals()[global_name])
+    if global_name in deps:
+        importlib.reload(deps[global_name])
     else:
         # Attempt to import the module and assign it to globals dictionary. This allow to access the module under
         # the given name, just like the regular import would.
-        globals()[global_name] = importlib.import_module(module_name)
+        deps[global_name] = importlib.import_module(module_name)
 
 
 def install_pip():
