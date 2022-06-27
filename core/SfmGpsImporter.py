@@ -24,16 +24,16 @@ class SfmGpsImporter:
         xyz_MR = []
         xyz_ECEF = []
         transformer = Transformer.from_crs(LLH, ECEF)
-        for g in gps[2:]:
+        for g in gps[1:]:
             l = g.strip().split(',')
             for v in df:
                 if v['fileName'] == l[1]:
                     if 'center' in v:
                         xyz = transformer.transform(
-                            float(l[3]), float(l[2]), float(l[4]))
+                            float(l[2]), float(l[3]), float(l[4]))
                         xyz_ECEF.append(xyz)
                         xyz_MR.append(v['center'])
-                    v['llh'] = [float(l[3]), float(l[2]), float(l[4])]
+                    v['llh'] = [float(l[2]), float(l[3]), float(l[4])]
                     v['ecef'] = xyz
         self.df = df
         self.xyz_ECEF = np.array(xyz_ECEF)
