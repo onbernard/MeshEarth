@@ -32,7 +32,7 @@ Dependency = namedtuple("Dependency", ["module", "package", "name"])
 # of the arguments. DO NOT use this to import other parts of your Python add-on, import them as usual with an
 # "import" statement.
 dependencies = (Dependency(module="pyproj", package=None, name=None),
-                Dependency(module="sklearn.linear_model", package=None, name=None))
+                Dependency(module="sklearn.linear_model", package="sklearn", name=None))
 
 
 dependencies_installed = False
