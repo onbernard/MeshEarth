@@ -111,6 +111,7 @@ def install_and_import_module(module_name, package_name=None, global_name=None):
                    package_name], check=True, env=environ_copy)
 
     # The installation succeeded, attempt to import the module again
+
     import_module(module_name, global_name)
 
 
@@ -181,7 +182,7 @@ class ME_OT_install_dependencies(bpy.types.Operator):
                                           package_name=dependency.package,
                                           global_name=dependency.name)
         except (subprocess.CalledProcessError, ImportError) as err:
-            self.report({"ERROR"}, str(err))
+            self.report({"ERROR, try restarting blender."}, str(err))
             return {"CANCELLED"}
 
         global dependencies_installed
