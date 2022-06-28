@@ -11,3 +11,6 @@ Positive x is east, positive y is north, positive z is up. Import the model acco
 ## Dependencies
 This addon requires sklearn and pyproj to work. If these are not installed, you can do so in the addon preference window. As they are installed when interpreter
 is running, imports might fail if there are dependencies issues. Try restarting blender if that happens.
+
+## Examples
+You will find a 3d model, a csv and a sfm file in the example folder to try it out yourself.
