@@ -4,6 +4,7 @@ import subprocess
 from collections import namedtuple
 import importlib
 import sys
+import site
 
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
@@ -32,10 +33,12 @@ Dependency = namedtuple("Dependency", ["module", "package", "name"])
 # of the arguments. DO NOT use this to import other parts of your Python add-on, import them as usual with an
 # "import" statement.
 dependencies = (Dependency(module="pyproj", package=None, name=None),
-                Dependency(module="sklearn.linear_model", package="sklearn", name=None))
+                Dependency(module="sklearn.linear_model", package="sklearn", name=None),
+                Dependency(module="numpy", package=None, name=None))
 
 
 dependencies_installed = False
+dependencies_imported = False
 
 
 def import_module(module_name, global_name=None, reload=True):
@@ -50,12 +53,13 @@ def import_module(module_name, global_name=None, reload=True):
     if global_name is None:
         global_name = module_name
 
-    if global_name in deps:
-        importlib.reload(deps[global_name])
+    if global_name in globals():
+        importlib.reload(globals()[global_name])
     else:
         # Attempt to import the module and assign it to globals dictionary. This allow to access the module under
         # the given name, just like the regular import would.
-        deps[global_name] = importlib.import_module(module_name)
+        globals()[global_name] = importlib.import_module(module_name)
+    deps[global_name]=globals()[global_name]
 
 
 def install_pip():
@@ -79,7 +83,7 @@ def install_pip():
         os.environ.pop("PIP_REQ_TRACKER", None)
 
 
-def install_and_import_module(module_name, package_name=None, global_name=None):
+def install_and_import_module(module_name, package_name=None, global_name=None, imp=True):
     """
     Installs the package through pip and attempts to import the installed module.
     :param module_name: Module to import.
@@ -111,8 +115,8 @@ def install_and_import_module(module_name, package_name=None, global_name=None):
                    package_name], check=True, env=environ_copy)
 
     # The installation succeeded, attempt to import the module again
-
-    import_module(module_name, global_name)
+    if imp:
+        import_module(module_name, global_name)
 
 
 class ENUTransformPanel(bpy.types.Panel):
@@ -143,6 +147,9 @@ class ENUTransformPanel(bpy.types.Panel):
             for line in lines:
                 row = layout.row()
                 row.label(text=line)
+        elif (not dependencies_imported):
+            row = layout.row()
+            row.label(text="Please restart blender to apply changes.")
         else:
             scn = context.scene
             row = layout.row()
@@ -176,22 +183,31 @@ class ME_OT_install_dependencies(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            install_pip()
+            install_pip()#importlib.invalidate_caches()
+            #print(importlib.util.find_spec("numpy"))
+            #sys.modules.pop('numpy')
+            #install_and_import_module("pip")
+            
+            #process = subprocess.run([sys.executable, "-m", "site"], capture_output=True)
+
+            #stdout_as_str = process.stdout.decode("utf-8")
+            #print(stdout_as_str)
+            #sys.path.append("/home/lambda/.local")
+            #importlib.reload(site)
+            #sys.modules.pop('numpy')
+            #self.report({"INFO"}, "Successfully installed numpy")
             for dependency in dependencies:
                 install_and_import_module(module_name=dependency.module,
                                           package_name=dependency.package,
-                                          global_name=dependency.name)
+                                          global_name=dependency.name,
+                                          imp=False)
         except (subprocess.CalledProcessError, ImportError) as err:
-            self.report({"ERROR, try restarting blender."}, str(err))
+            self.report({"ERROR"}, str(err))
             return {"CANCELLED"}
 
         global dependencies_installed
         dependencies_installed = True
-
-        # Register the panels, operators, etc. since dependencies are installed
-        for cls in classes:
-            bpy.utils.register_class(cls)
-
+        self.report({"INFO"}, "Successfully installed dependencies")
         return {"FINISHED"}
 
 
@@ -210,8 +226,14 @@ preference_classes = (ENUTransformPanel,
 
 
 def register():
+    bpy.types.Scene.sfm_filepath = bpy.props.StringProperty(
+        default="")
+    bpy.types.Scene.gps_filepath = bpy.props.StringProperty(
+        default="")
     global dependencies_installed
     dependencies_installed = False
+    global dependencies_imported
+    dependencies_imported = False
 
     for cls in preference_classes:
         bpy.utils.register_class(cls)
@@ -221,23 +243,22 @@ def register():
             import_module(module_name=dependency.module,
                           global_name=dependency.name)
         dependencies_installed = True
-    except ModuleNotFoundError:
+        dependencies_imported = True
+    except Exception:
         # Don't register other panels, operators etc.
         return
 
     for cls in classes:
         bpy.utils.register_class(cls)
-    bpy.types.Scene.sfm_filepath = bpy.props.StringProperty(
-        default="")
-    bpy.types.Scene.gps_filepath = bpy.props.StringProperty(
-        default="")
 
 
 def unregister():
+    del bpy.types.Scene.sfm_filepath
+    del bpy.types.Scene.gps_filepath
     for cls in preference_classes:
         bpy.utils.unregister_class(cls)
 
-    if dependencies_installed:
+    if dependencies_imported:
         for cls in classes:
             bpy.utils.unregister_class(cls)
 
