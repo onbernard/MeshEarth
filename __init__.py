@@ -210,6 +210,10 @@ preference_classes = (ENUTransformPanel,
 
 
 def register():
+    bpy.types.Scene.sfm_filepath = bpy.props.StringProperty(
+        default="")
+    bpy.types.Scene.gps_filepath = bpy.props.StringProperty(
+        default="")
     global dependencies_installed
     dependencies_installed = False
 
@@ -227,10 +231,6 @@ def register():
 
     for cls in classes:
         bpy.utils.register_class(cls)
-    bpy.types.Scene.sfm_filepath = bpy.props.StringProperty(
-        default="")
-    bpy.types.Scene.gps_filepath = bpy.props.StringProperty(
-        default="")
 
 
 def unregister():
@@ -240,6 +240,8 @@ def unregister():
     if dependencies_installed:
         for cls in classes:
             bpy.utils.unregister_class(cls)
+    del bpy.types.Scene.sfm_filepath
+    del bpy.types.Scene.gps_filepath
 
 
 if __name__ == "__main__":
