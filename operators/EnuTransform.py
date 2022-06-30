@@ -18,7 +18,6 @@ class ME_OT_object_enu_transform(bpy.types.Operator):
         scn = context.scene
         handler = SfmGpsImporter(scn.sfm_filepath, scn.gps_filepath)
         M = computeTransformMatrix(handler.xyz_MR, handler.xyz_ECEF)
-        print(M)
         ob = bpy.context.object
         me = ob.data
         me.transform(M)

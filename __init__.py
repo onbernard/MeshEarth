@@ -33,7 +33,8 @@ Dependency = namedtuple("Dependency", ["module", "package", "name"])
 # of the arguments. DO NOT use this to import other parts of your Python add-on, import them as usual with an
 # "import" statement.
 dependencies = (Dependency(module="pyproj", package=None, name=None),
-                Dependency(module="sklearn.linear_model", package="sklearn", name=None),
+                Dependency(module="sklearn.linear_model",
+                           package="sklearn", name=None),
                 Dependency(module="numpy", package=None, name=None))
 
 
@@ -59,7 +60,7 @@ def import_module(module_name, global_name=None, reload=True):
         # Attempt to import the module and assign it to globals dictionary. This allow to access the module under
         # the given name, just like the regular import would.
         globals()[global_name] = importlib.import_module(module_name)
-    deps[global_name]=globals()[global_name]
+    deps[global_name] = globals()[global_name]
 
 
 def install_pip():
@@ -183,18 +184,18 @@ class ME_OT_install_dependencies(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            install_pip()#importlib.invalidate_caches()
-            #print(importlib.util.find_spec("numpy"))
-            #sys.modules.pop('numpy')
-            #install_and_import_module("pip")
-            
+            install_pip()  # importlib.invalidate_caches()
+            # print(importlib.util.find_spec("numpy"))
+            # sys.modules.pop('numpy')
+            # install_and_import_module("pip")
+
             #process = subprocess.run([sys.executable, "-m", "site"], capture_output=True)
 
             #stdout_as_str = process.stdout.decode("utf-8")
-            #print(stdout_as_str)
-            #sys.path.append("/home/lambda/.local")
-            #importlib.reload(site)
-            #sys.modules.pop('numpy')
+            # print(stdout_as_str)
+            # sys.path.append("/home/lambda/.local")
+            # importlib.reload(site)
+            # sys.modules.pop('numpy')
             #self.report({"INFO"}, "Successfully installed numpy")
             for dependency in dependencies:
                 install_and_import_module(module_name=dependency.module,
