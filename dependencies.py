@@ -1,1 +1,1 @@
-deps = globals()
+deps = {}
